@@ -1,0 +1,3 @@
+from pathlib import Path
+
+def unlzw(inp: Path | bytes) -> bytes: ...

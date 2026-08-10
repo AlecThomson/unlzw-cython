@@ -76,3 +76,9 @@ ignore = [
 [tool.mypy]
 files = ["src"]
 strict = true
+
+[tool.codespell]
+# "orginal" is a typo preserved verbatim inside Mark Adler's original license
+# notice, copied into LICENSE.txt and the docstrings that carry it; the
+# license terms forbid altering that notice.
+ignore-words-list = "orginal"

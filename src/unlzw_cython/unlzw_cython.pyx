@@ -78,7 +78,7 @@ def unlzw(inp: Path | bytes) -> bytes:
         # Set up: get the first 9-bit code, which is the first decompressed byte,
         # but don't create a table entry until the next code
         buf = ba_in[3] | (ba_in[4] << 8)
-        prev = buf & mask 
+        prev = buf & mask
         buf >>= bits
         left = 16 - bits
         final = prev # code

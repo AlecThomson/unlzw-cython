@@ -28,7 +28,7 @@ Issues = "https://github.com/AlecThomson/unlzw-cython/issues"
 
 [project.optional-dependencies]
 tests = ["pytest"]
-dev = ["ruff", "mypy"]
+dev = ["ruff", "mypy", "prek"]
 
 [tool.hatch.version]
 source = "vcs"
@@ -56,6 +56,9 @@ ignore = [
   "TRY003", # long exception messages: would require a bespoke exception class
             # per validation error for what is otherwise a flat list of format
             # checks; not worth the abstraction here
+  "CPY001", # no per-file copyright headers; licensing is centralized in
+            # LICENSE.txt (plus the upstream notice already carried in the
+            # implementation modules' docstrings)
 ]
 
 [tool.ruff.lint.per-file-ignores]

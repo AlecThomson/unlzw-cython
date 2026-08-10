@@ -1,36 +1,61 @@
-# unlzw3
+# unlzw-cython
 
-[![ci](https://github.com/scivision/unlzw3/actions/workflows/ci.yml/badge.svg)](https://github.com/scivision/unlzw3/actions/workflows/ci.yml)
-[![PyPi Download stats](http://pepy.tech/badge/unlzw3)](http://pepy.tech/project/unlzw3)
+[![ci](https://github.com/AlecThomson/unlzw-cython/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecThomson/unlzw-cython/actions/workflows/ci.yml)
 
-Pure Python decompression module for .Z files compressed using Unix compress utility.
-Unlike the faster but Linux-specific
-[unlzw](https://pypi.org/project/unlzw/)
-using Python CFFI, `unlzw3` is slower but works on any platform that runs Python including Windows.
+Cython-accelerated decompression module for `.Z` files compressed using the Unix
+`compress` utility (LZW compression).
 
-This is a purely Python adaptation of Mark Adler's
-['unlzw' C function](http://mathematica.stackexchange.com/questions/60531/how-can-i-read-compressed-z-file-automatically-by-mathematica/60879#60879)
-on Stackoverflow.
-Python can be much slower than using any compiled utility for the same purpose.
+This is a fork of [`unlzw3`](https://github.com/scivision/unlzw3), published
+under a new name because the upstream project is unmaintained. `unlzw3.unlzw`
+was a pure-Python adaptation of Mark Adler's
+['unlzw' C function](http://mathematica.stackexchange.com/questions/60531/how-can-i-read-compressed-z-file-automatically-by-mathematica/60879#60879);
+this fork adds a Cython-compiled implementation as the default, with the
+original pure-Python implementation kept as `unlzw_pure` and used as an
+automatic fallback if a compiled wheel isn't available for your platform.
+
+## Installation
+
+```sh
+pip install unlzw-cython
+```
+
+Prebuilt wheels are published for Linux, macOS, and Windows. If none matches
+your platform, installing from source requires a C compiler (Cython is pulled in
+automatically as a build dependency).
 
 ## Usage
 
-`unlzw3.unlzw(data)` takes LZW .Z compressed data as any type which can be converted to a bytearray (generally a string).
-It returns a UTF-8 decoded string containing the decompressed data.
+`unlzw_cython.unlzw(data)` takes LZW `.Z` compressed data as `bytes` or a
+`pathlib.Path`, and returns the decompressed bytes.
 
 ```python
-import unlzw3
+import unlzw_cython
 from pathlib import Path
 
-uncompressed_data = unlzw3.unlzw(Path('file.Z').read_bytes())
+uncompressed_data = unlzw_cython.unlzw(Path("file.Z").read_bytes())
 
 # or
 
-uncompressed_data = unlzw3.unlzw(Path('file.Z'))
+uncompressed_data = unlzw_cython.unlzw(Path("file.Z"))
+```
+
+The pure-Python implementation is also available directly, e.g. for platforms
+without a compiled wheel:
+
+```python
+uncompressed_data = unlzw_cython.unlzw_pure(Path("file.Z"))
 ```
 
 ## Contributions
 
-* reference C code: Mark Adler
-* pure Python implemetation: [Brandon Owen](https://github.com/umeat/unlzw)
-* Cython implementation: [AlecThomson](https://github.com/AlecThomson)
+- reference C code: Mark Adler
+- pure Python implementation: [Brandon Owen](https://github.com/umeat/unlzw)
+- cross-platform pure-Python fork (`unlzw3`):
+  [Michael Hirsch](https://github.com/scivision/unlzw3)
+- Cython implementation and `unlzw-cython` fork:
+  [Alec Thomson](https://github.com/AlecThomson)
+
+## License
+
+zlib License (see `LICENSE.txt`) — inherited from Mark Adler's original C
+implementation.

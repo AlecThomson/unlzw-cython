@@ -4,14 +4,21 @@ on:
   push:
     paths:
       - "**.py"
+      - "**.pyx"
+      - "**.pyi"
+      - "pyproject.toml"
+      - ".pre-commit-config.yaml"
       - ".github/workflows/ci.yml"
   workflow_dispatch:
 
+permissions: {}
 
 jobs:
-
   core:
     runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
 
     strategy:
       matrix:
@@ -19,14 +26,20 @@ jobs:
         python-version: ["3.9", "3.13"]
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
-    - run: pip install -e .[tests,lint]
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - run: flake8
-    - run: mypy
+      - name: Install ncompress (for differential tests)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ncompress
 
-    - run: pytest
+      - run: uv sync --extra tests --extra dev
+
+      - run: uv run prek run --all-files
+
+      - run: uv run pytest

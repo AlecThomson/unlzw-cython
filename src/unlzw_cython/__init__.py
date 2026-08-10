@@ -23,12 +23,20 @@ Mark Adler
 madler@alumni.caltech.edu
 """
 
+import warnings
+
 from unlzw_cython._version import version as __version__
 from unlzw_cython.unlzw_pure import unlzw as unlzw_pure
 
 try:
     from unlzw_cython.unlzw_cython import unlzw
 except ImportError:
+    warnings.warn(
+        "unlzw_cython: compiled extension unavailable, falling back to the "
+        "slower pure-Python implementation",
+        RuntimeWarning,
+        stacklevel=2,
+    )
     unlzw = unlzw_pure
 
 __all__ = ["__version__", "unlzw", "unlzw_pure"]

@@ -43,8 +43,13 @@ dependencies = ["hatch-cython"]
 src = "unlzw_cython"
 compile_py = false
 
-[tool.hatch.build.targets.sdist]
-include = ["src", "README.md", "LICENSE.txt"]
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "--showlocals"]
+strict = true
+filterwarnings = ["error"]
+log_level = "INFO"
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
@@ -80,7 +85,7 @@ ignore = [
 ]
 
 [tool.mypy]
-files = ["src"]
+files = ["src", "tests"]
 strict = true
 
 [tool.codespell]

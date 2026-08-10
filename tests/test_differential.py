@@ -6,7 +6,6 @@ of the .Z / LZW format Mark Adler's C `unlzw` targets).
 
 from __future__ import annotations
 
-import importlib.resources as pkgr
 import random
 import shutil
 import subprocess
@@ -16,6 +15,8 @@ from pathlib import Path
 import pytest
 
 import unlzw_cython
+
+FIXTURES = Path(__file__).parent
 
 UnlzwFunc = Callable[[Path | bytes], bytes]
 
@@ -58,10 +59,10 @@ def test_differential_fuzz(tmp_path: Path, max_bits: int) -> None:
 @pytest.mark.skipif(not zcat_available, reason="system 'zcat' binary not available")
 @pytest.mark.parametrize("fixture", ["hello.Z", "lipsum.com.Z"])
 def test_differential_against_zcat(fixture: str) -> None:
-    with pkgr.as_file(pkgr.files(__package__).joinpath(fixture)) as fn:
-        reference = subprocess.run(["zcat", str(fn)], check=True, capture_output=True).stdout
-        assert unlzw_cython.unlzw(fn) == reference
-        assert unlzw_cython.unlzw_pure(fn) == reference
+    fn = FIXTURES / fixture
+    reference = subprocess.run(["zcat", str(fn)], check=True, capture_output=True).stdout
+    assert unlzw_cython.unlzw(fn) == reference
+    assert unlzw_cython.unlzw_pure(fn) == reference
 
 
 @pytest.mark.parametrize("fun", [unlzw_cython.unlzw_pure, unlzw_cython.unlzw])

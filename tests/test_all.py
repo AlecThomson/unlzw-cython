@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import builtins
 import importlib
-import importlib.resources as pkgr
+import importlib.metadata
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -13,21 +13,26 @@ import unlzw_cython
 
 LIPSUM_DECOMPRESSED_LEN = 100172
 
+FIXTURES = Path(__file__).parent
+
 UnlzwFunc = Callable[[Path | bytes], bytes]
+
+
+def test_version() -> None:
+    assert importlib.metadata.version("unlzw-cython") == unlzw_cython.__version__
 
 
 @pytest.mark.parametrize("fun", [unlzw_cython.unlzw_pure, unlzw_cython.unlzw])
 def test_simple(fun: UnlzwFunc) -> None:
-    with pkgr.as_file(pkgr.files(__package__).joinpath("hello.Z")) as fn:
-        assert fun(fn) == b"He110\n"
+    assert fun(FIXTURES / "hello.Z") == b"He110\n"
 
 
 @pytest.mark.parametrize("fun", [unlzw_cython.unlzw_pure, unlzw_cython.unlzw])
 def test_lipsum(fun: UnlzwFunc) -> None:
     """Courtesy lipsum.com."""
-    with pkgr.as_file(pkgr.files(__package__).joinpath("lipsum.com.Z")) as fn:
-        data = fun(fn)
-        d2 = fun(fn.read_bytes())
+    fn = FIXTURES / "lipsum.com.Z"
+    data = fun(fn)
+    d2 = fun(fn.read_bytes())
 
     assert d2 == data
     assert len(data) == LIPSUM_DECOMPRESSED_LEN
@@ -50,5 +55,6 @@ def test_fallback_warns_when_extension_unavailable(monkeypatch: pytest.MonkeyPat
             fresh = importlib.import_module("unlzw_cython")
         assert fresh.unlzw is fresh.unlzw_pure
     finally:
+        monkeypatch.undo()  # restore the real __import__ before reimporting for real
         sys.modules.pop("unlzw_cython", None)
         importlib.import_module("unlzw_cython")

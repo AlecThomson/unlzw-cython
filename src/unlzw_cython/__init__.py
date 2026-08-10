@@ -23,6 +23,7 @@ Mark Adler
 madler@alumni.caltech.edu
 """
 
+from unlzw_cython._version import version as __version__
 from unlzw_cython.unlzw_pure import unlzw as unlzw_pure
 
 try:
@@ -30,4 +31,4 @@ try:
 except ImportError:
     unlzw = unlzw_pure
 
-__all__ = ["unlzw", "unlzw_pure"]
+__all__ = ["__version__", "unlzw", "unlzw_pure"]

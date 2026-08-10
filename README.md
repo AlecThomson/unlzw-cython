@@ -5,8 +5,7 @@
 Cython-accelerated decompression module for `.Z` files compressed using the Unix
 `compress` utility (LZW compression).
 
-This is a fork of [`unlzw3`](https://github.com/scivision/unlzw3), published
-under a new name because the upstream project is unmaintained. `unlzw3.unlzw`
+This is a fork of [`unlzw3`](https://github.com/scivision/unlzw3). `unlzw3.unlzw`
 was a pure-Python adaptation of Mark Adler's
 ['unlzw' C function](http://mathematica.stackexchange.com/questions/60531/how-can-i-read-compressed-z-file-automatically-by-mathematica/60879#60879);
 this fork adds a Cython-compiled implementation as the default, with the

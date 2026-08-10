@@ -1,5 +1,6 @@
-"""
-Cython implementation by AlecThomson
+"""Cython-accelerated decompression module for Unix compress .Z files.
+
+Cython implementation by AlecThomson.
 
 Written by Brandon Owen, May 2016, brandon.owen@hotmail.com
 Adapted from original work by Mark Adler - orginal copyright notice below

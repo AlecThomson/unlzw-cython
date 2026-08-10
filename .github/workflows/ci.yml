@@ -1,32 +1,77 @@
-name: ci
+name: CI
 
 on:
-  push:
-    paths:
-      - "**.py"
-      - ".github/workflows/ci.yml"
   workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 3
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
-  core:
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: "3.13"
+
+      - run: uv sync --extra tests --extra dev
+
+      - run: uv run prek run --all-files
+
+  checks:
+    name: Check Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
+    needs: [lint]
+    permissions:
+      contents: read
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        python-version: ["3.9", "3.13"]
+        # every actively maintained CPython series (see devguide.python.org/versions)
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
-    - run: pip install .[tests,lint]
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - run: flake8
-    - run: mypy
+      - name: Install ncompress (for differential tests)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ncompress
 
-    - run: pytest
+      - run: uv sync --extra tests --extra dev
+
+      - run: uv run pytest
+
+  pass:
+    if: always()
+    needs: [lint, checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}

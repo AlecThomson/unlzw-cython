@@ -1,4 +1,4 @@
-src/unlzw3/unlzw.c
+src/unlzw_cython/unlzw.c
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -101,3 +101,5 @@ ENV/
 
 # mypy
 .mypy_cache/
+src/unlzw_cython/unlzw_cython.c
+src/unlzw_cython/_version.py

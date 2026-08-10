@@ -1,5 +1,6 @@
-"""
-Cython implementation by AlecThomson
+"""Cython-accelerated decompression module for Unix compress .Z files.
+
+Cython implementation by AlecThomson.
 
 Written by Brandon Owen, May 2016, brandon.owen@hotmail.com
 Adapted from original work by Mark Adler - orginal copyright notice below
@@ -22,9 +23,20 @@ Mark Adler
 madler@alumni.caltech.edu
 """
 
-from .unlzw3_cython import unlzw
-from .unlzw_pure import unlzw as unlzw_pure
+import warnings
 
-__all__ = ["unlzw", "unlzw_pure"]
+from unlzw_cython._version import version as __version__
+from unlzw_cython.unlzw_pure import unlzw as unlzw_pure
 
-__version__ = "1.0.0"
+try:
+    from unlzw_cython.unlzw_cython import unlzw
+except ImportError:
+    warnings.warn(
+        "unlzw_cython: compiled extension unavailable, falling back to the "
+        "slower pure-Python implementation",
+        RuntimeWarning,
+        stacklevel=2,
+    )
+    unlzw = unlzw_pure
+
+__all__ = ["__version__", "unlzw", "unlzw_pure"]

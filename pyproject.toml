@@ -1,41 +1,96 @@
 [build-system]
-requires = ["setuptools>=74.1.0", "wheel", "Cython"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs", "hatch-cython", "Cython", "setuptools"]
+build-backend = "hatchling.build"
 
 [project]
-name = "unlzw3"
-authors = [{name="Brandon Owen", email="brandon.owen@hotmail.com"}]
-maintainers = [{name="Tom Kralidis", email="tomkralidis@gmail.com"}]
-description = "Pure Python decompression module for .Z files compressed using Unix compress utility"
-keywords = ["lzw"]
+name = "unlzw-cython"
+authors = [{name = "Alec Thomson", email = "AlecThomson@users.noreply.github.com"}]
+description = "Cython-accelerated decompression module for .Z files compressed using the Unix compress utility"
+keywords = ["lzw", "compress", "cython"]
+license = "Zlib"
+readme = "README.md"
 classifiers = [
-"Development Status :: 4 - Beta",
-"Environment :: Console",
-"License :: OSI Approved :: MIT License",
-"Operating System :: OS Independent",
-"Programming Language :: Python :: 3",
-"Topic :: System :: Archiving :: Compression",
-"Topic :: Utilities"
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Cython",
+  "Topic :: System :: Archiving :: Compression",
+  "Topic :: Utilities",
 ]
-dynamic = ["readme", "version"]
-requires-python = ">=3.9"
+dynamic = ["version"]
+requires-python = ">=3.10"
+
+[project.urls]
+Homepage = "https://github.com/AlecThomson/unlzw-cython"
+Repository = "https://github.com/AlecThomson/unlzw-cython"
+Issues = "https://github.com/AlecThomson/unlzw-cython/issues"
 
 [project.optional-dependencies]
 tests = ["pytest"]
-lint = ["flake8", "flake8-bugbear", "flake8-builtins", "flake8-blind-except", "mypy"]
+dev = ["ruff", "mypy", "prek"]
 
-[tool.setuptools]
-ext-modules = [
-  {name = "unlzw3.unlzw3_cython", sources = ["src/unlzw3/unlzw.pyx"]}
-]
+[tool.hatch.version]
+source = "vcs"
 
-[tool.setuptools.dynamic]
-readme = {file = ["README.md"], content-type = "text/markdown"}
-version = {attr = "unlzw3.__version__"}
+[tool.hatch.build.hooks.vcs]
+version-file = "src/unlzw_cython/_version.py"
 
-[tool.black]
+[tool.hatch.build.targets.wheel.hooks.cython]
+dependencies = ["hatch-cython"]
+
+[tool.hatch.build.targets.wheel.hooks.cython.options]
+src = "unlzw_cython"
+compile_py = false
+
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "--showlocals"]
+strict = true
+filterwarnings = ["error"]
+log_level = "INFO"
+testpaths = ["tests"]
+
+[tool.ruff]
 line-length = 100
 
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "COM812", # trailing comma - conflicts with ruff format
+  "ISC001", # implicit string concat - conflicts with ruff format
+  "D203",   # one-blank-line-before-class - conflicts with D211
+  "D213",   # multi-line-summary-second-line - conflicts with D212
+  "TRY003", # long exception messages: would require a bespoke exception class
+            # per validation error for what is otherwise a flat list of format
+            # checks; not worth the abstraction here
+  "CPY001", # no per-file copyright headers; licensing is centralized in
+            # LICENSE.txt (plus the upstream notice already carried in the
+            # implementation modules' docstrings)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"unlzw_pure.py" = [
+  "C901",    # unlzw() is a line-for-line mirror of unlzw_cython.pyx and Mark
+  "PLR0912", # Adler's reference C, kept structurally identical on purpose so
+  "PLR0915", # the two can be diffed against each other for correctness
+]
+"tests/*" = [
+  "S101",   # assert is how pytest asserts
+  "S311",   # random is fine for generating fuzz-test inputs, not crypto
+  "S603",   # subprocess calls use a fixed argv, not untrusted input
+  "S607",   # calling system utilities like `compress`/`zcat` by name is fine
+  "D",      # tests don't need docstrings
+  "ANN201", # test functions don't need return type annotations
+  "INP001", # top-level tests/ is deliberately not a package (no __init__.py)
+]
+
 [tool.mypy]
-files = ["src"]
-ignore_missing_imports = true
+files = ["src", "tests"]
+strict = true
+
+[tool.codespell]
+# "orginal" is a typo preserved verbatim inside Mark Adler's original license
+# notice, copied into LICENSE.txt and the docstrings that carry it; the
+# license terms forbid altering that notice.
+ignore-words-list = "orginal"

@@ -1,17 +1,17 @@
 import importlib.resources as pkgr
 import pytest
 
-import unlzw3
+import unlzw_cython
 
 
-@pytest.mark.parametrize("fun", [unlzw3.unlzw_pure, unlzw3.unlzw])
+@pytest.mark.parametrize("fun", [unlzw_cython.unlzw_pure, unlzw_cython.unlzw])
 def test_simple(fun):
 
     with pkgr.as_file(pkgr.files(__package__).joinpath("hello.Z")) as fn:
         assert fun(fn) == b"He110\n"
 
 
-@pytest.mark.parametrize("fun", [unlzw3.unlzw_pure, unlzw3.unlzw])
+@pytest.mark.parametrize("fun", [unlzw_cython.unlzw_pure, unlzw_cython.unlzw])
 def test_lipsum(fun):
     """
     courtesy lipsum.com

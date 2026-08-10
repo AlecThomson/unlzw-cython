@@ -1,41 +1,67 @@
 [build-system]
-requires = ["setuptools>=74.1.0", "wheel", "Cython"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs", "hatch-cython", "Cython", "setuptools"]
+build-backend = "hatchling.build"
 
 [project]
-name = "unlzw3"
-authors = [{name="Brandon Owen", email="brandon.owen@hotmail.com"}]
-maintainers = [{name="Tom Kralidis", email="tomkralidis@gmail.com"}]
-description = "Pure Python decompression module for .Z files compressed using Unix compress utility"
-keywords = ["lzw"]
+name = "unlzw-cython"
+authors = [{name = "Alec Thomson", email = "AlecThomson@users.noreply.github.com"}]
+description = "Cython-accelerated decompression module for .Z files compressed using the Unix compress utility"
+keywords = ["lzw", "compress", "cython"]
+license = "Zlib"
+readme = "README.md"
 classifiers = [
-"Development Status :: 4 - Beta",
-"Environment :: Console",
-"License :: OSI Approved :: MIT License",
-"Operating System :: OS Independent",
-"Programming Language :: Python :: 3",
-"Topic :: System :: Archiving :: Compression",
-"Topic :: Utilities"
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Cython",
+  "Topic :: System :: Archiving :: Compression",
+  "Topic :: Utilities",
 ]
-dynamic = ["readme", "version"]
+dynamic = ["version"]
 requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/AlecThomson/unlzw-cython"
+Repository = "https://github.com/AlecThomson/unlzw-cython"
+Issues = "https://github.com/AlecThomson/unlzw-cython/issues"
 
 [project.optional-dependencies]
 tests = ["pytest"]
-lint = ["flake8", "flake8-bugbear", "flake8-builtins", "flake8-blind-except", "mypy"]
+dev = ["ruff", "mypy"]
 
-[tool.setuptools]
-ext-modules = [
-  {name = "unlzw3.unlzw_cython", sources = ["src/unlzw3/unlzw_cython.pyx"]}
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel.hooks.cython]
+dependencies = ["hatch-cython"]
+
+[tool.hatch.build.targets.wheel.hooks.cython.options]
+src = "unlzw_cython"
+compile_py = false
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "README.md", "LICENSE.txt"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "COM812", # trailing comma - conflicts with ruff format
+  "ISC001", # implicit string concat - conflicts with ruff format
+  "D203",   # one-blank-line-before-class - conflicts with D211
+  "D213",   # multi-line-summary-second-line - conflicts with D212
 ]
 
-[tool.setuptools.dynamic]
-readme = {file = ["README.md"], content-type = "text/markdown"}
-version = {attr = "unlzw3.__version__"}
-
-[tool.black]
-line-length = 100
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = [
+  "S101",   # assert is how pytest asserts
+  "D",      # tests don't need docstrings
+  "ANN201", # test functions don't need return type annotations
+]
 
 [tool.mypy]
 files = ["src"]
-ignore_missing_imports = true
+strict = true

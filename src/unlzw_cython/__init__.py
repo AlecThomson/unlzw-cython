@@ -22,9 +22,11 @@ Mark Adler
 madler@alumni.caltech.edu
 """
 
-from unlzw3.unlzw_cython import unlzw
-from unlzw3.unlzw_pure import unlzw as unlzw_pure
+from unlzw_cython.unlzw_pure import unlzw as unlzw_pure
+
+try:
+    from unlzw_cython.unlzw_cython import unlzw
+except ImportError:
+    unlzw = unlzw_pure
 
 __all__ = ["unlzw", "unlzw_pure"]
-
-__version__ = "1.0.0"

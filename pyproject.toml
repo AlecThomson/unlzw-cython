@@ -75,13 +75,14 @@ ignore = [
   "PLR0912", # Adler's reference C, kept structurally identical on purpose so
   "PLR0915", # the two can be diffed against each other for correctness
 ]
-"**/tests/*" = [
+"tests/*" = [
   "S101",   # assert is how pytest asserts
   "S311",   # random is fine for generating fuzz-test inputs, not crypto
   "S603",   # subprocess calls use a fixed argv, not untrusted input
   "S607",   # calling system utilities like `compress`/`zcat` by name is fine
   "D",      # tests don't need docstrings
   "ANN201", # test functions don't need return type annotations
+  "INP001", # top-level tests/ is deliberately not a package (no __init__.py)
 ]
 
 [tool.mypy]

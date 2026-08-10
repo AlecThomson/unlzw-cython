@@ -20,6 +20,11 @@ FIXTURES = Path(__file__).parent
 
 UnlzwFunc = Callable[[Path | bytes], bytes]
 
+UNLZW_IMPLS = [
+    pytest.param(unlzw_cython.unlzw_pure, id="pure"),
+    pytest.param(unlzw_cython.unlzw, id="cython"),
+]
+
 compress_available = shutil.which("compress") is not None
 zcat_available = shutil.which("zcat") is not None
 
@@ -65,7 +70,7 @@ def test_differential_against_zcat(fixture: str) -> None:
     assert unlzw_cython.unlzw_pure(fn) == reference
 
 
-@pytest.mark.parametrize("fun", [unlzw_cython.unlzw_pure, unlzw_cython.unlzw])
+@pytest.mark.parametrize("fun", UNLZW_IMPLS)
 class TestInvalidInput:
     """Malformed-input paths that valid .Z files from `compress` never exercise."""
 

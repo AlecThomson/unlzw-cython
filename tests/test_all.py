@@ -17,17 +17,22 @@ FIXTURES = Path(__file__).parent
 
 UnlzwFunc = Callable[[Path | bytes], bytes]
 
+UNLZW_IMPLS = [
+    pytest.param(unlzw_cython.unlzw_pure, id="pure"),
+    pytest.param(unlzw_cython.unlzw, id="cython"),
+]
+
 
 def test_version() -> None:
     assert importlib.metadata.version("unlzw-cython") == unlzw_cython.__version__
 
 
-@pytest.mark.parametrize("fun", [unlzw_cython.unlzw_pure, unlzw_cython.unlzw])
+@pytest.mark.parametrize("fun", UNLZW_IMPLS)
 def test_simple(fun: UnlzwFunc) -> None:
     assert fun(FIXTURES / "hello.Z") == b"He110\n"
 
 
-@pytest.mark.parametrize("fun", [unlzw_cython.unlzw_pure, unlzw_cython.unlzw])
+@pytest.mark.parametrize("fun", UNLZW_IMPLS)
 def test_lipsum(fun: UnlzwFunc) -> None:
     """Courtesy lipsum.com."""
     fn = FIXTURES / "lipsum.com.Z"
